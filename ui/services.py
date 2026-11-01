@@ -140,6 +140,10 @@ def validate_dataset(df):
     else:
         warnings.append("No 'Target' column, so the app can predict but can't score the models.")
 
+    if not errors:
+        from ui.guide import range_warnings
+        warnings.extend(range_warnings(df))
+
     extra = [c for c in df.columns if c not in needed and c != TARGET and c not in ID_COLUMNS]
     if extra:
         warnings.append(f"{len(extra)} extra column(s) will be ignored.")

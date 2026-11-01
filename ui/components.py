@@ -182,6 +182,8 @@ def upload_panel(key):
     f = st.file_uploader("Drag and drop a CSV file, or browse", type=["csv"], key=key,
                          help="Use the same columns as test_data.csv. Keep the 'Target' "
                               "column if you want the models scored.")
+    from ui.guide import csv_help
+    csv_help(key)
     if f is None or st.session_state.get("_handled_upload") == f.file_id:
         return
     st.session_state._handled_upload = f.file_id
