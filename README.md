@@ -3,7 +3,7 @@
 **ML Assignment 2, M.Tech (DSE), Machine Learning**
 
 - **Live app:** `<paste your Streamlit app link here>`
-- **GitHub repo:** `<paste your GitHub repository link here>`
+- **GitHub repo:** https://github.com/umasarath7/student-dropout-ml
 
 ---
 
@@ -70,7 +70,7 @@ All of this lives inside one scikit-learn `Pipeline` per model. The saved model 
 
 ## c. GitHub repository
 
-**Link:** `<paste your GitHub repository link here>`
+**Link:** https://github.com/umasarath7/student-dropout-ml
 
 ```
 project-folder/
