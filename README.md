@@ -168,12 +168,12 @@ Because there are three classes and they are not balanced:
 
 What the app offers:
 
-1. **CSV upload** (sidebar). Upload `test_data.csv`, or any CSV with the same columns. A *Download sample* button gives you the right file, and you can also tick *use the bundled test set* to try the app straight away.
-2. **Model selection dropdown** to switch between the five models.
-3. **Evaluation metrics:** Accuracy, AUC, Precision, Recall, F1 and MCC for the chosen model.
-4. **Confusion matrix** (heatmap) **and classification report** (precision, recall and F1 for each class), plus a note on which class the model finds hardest.
-5. **Compare all models** tab: all five models scored side by side on the uploaded data, with the best value in each column highlighted and a bar chart you can switch between metrics.
-6. **Predictions** tab: the predicted outcome and the probability of each class for every student, with a filter for students predicted to drop out and a CSV download.
+1. **CSV upload** (Step 1, at the top of the page). Upload `test_data.csv` or any CSV with the same columns. A green message confirms your file and its row count. Until you upload, the app uses the bundled test set so there is always something to see, and a *Download sample* button gives you the right file.
+2. **Model selection dropdown** (Step 2, next to the upload box) to switch between the five models.
+3. **Evaluation metrics:** Accuracy, AUC, Precision, Recall, F1 and MCC for the chosen model, to four decimals, matching the table above.
+4. **Confusion matrix** (heatmap, with a short note on how to read it) **and classification report** (precision, recall and F1 for each class), plus a note on which class the model finds hardest.
+5. **Compare all models** tab: all five models scored side by side, with the best value in each column in bold. A ranked bar chart with the exact value on each bar lets you switch between metrics, and a per-class recall table shows which group every model struggles with.
+6. **Predictions** tab: the actual outcome, the predicted outcome, whether it was correct, and the probability of each class for every student. Filters show only students predicted to drop out, or only wrong predictions, and the view can be downloaded as CSV.
 
 If the uploaded file has no `Target` column, the app still makes predictions and simply skips the scores.
 
