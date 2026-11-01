@@ -85,10 +85,11 @@ project-folder/
 │   ├── services.py            Loads models, validates data, computes every metric live
 │   ├── components.py          Reusable cards, KPI grid, model picker, upload panel
 │   ├── charts.py              Altair charts (comparison, confusion matrix, ROC, donut)
+│   ├── guide.py               CSV upload template, column guide and range checks
 │   ├── theme.py               Colours and styles
 │   └── icons.py               Lucide icons
 ├── views/                     One file per page: dashboard, evaluation, predictions,
-│                              dataset, insights, settings
+│                              dataset, insights, settings, docs
 └── model/
     ├── features.py            Loading, feature engineering, encoding and scaling
     ├── metrics.py             The six evaluation metrics
@@ -185,6 +186,7 @@ The app is branded **EduPulse: Predict. Understand. Empower.** It has a dark das
 | **Dataset** | Drag-and-drop CSV upload with step-by-step checks, sample download, quality summary (missing values, duplicates, required columns), column types and a paged preview |
 | **Insights** | Findings and suggested actions written from the live results: baseline comparison, hardest outcome to detect, most common mistake, how much the models agree with each other, high-risk students |
 | **Settings** | Dropout-risk band thresholds, reset to the bundled data, tuned model settings |
+| **Documentation** | What was done in this project (problem, data, pipeline, tuned settings, results), how to use each page, how to prepare a CSV (template, column guide, upload checks) and limitations |
 
 How it maps to the assignment's required features:
 
@@ -194,6 +196,17 @@ How it maps to the assignment's required features:
 4. **Confusion matrix and classification report:** on the Dashboard and the Model Evaluation page.
 
 Every number is calculated live from the saved models on whichever dataset is loaded; nothing is hardcoded. If a file has no `Target` column, the app still makes predictions and shows a short note wherever scores would appear.
+
+### Preparing your own CSV
+
+No machine-learning preprocessing is needed: the saved models do the scaling, encoding and extra features themselves. Every input column is numeric, and categories such as `Course` are stored as number codes, so a new file must use the same 34 column names and the same codes as the original data.
+
+The app provides an **upload template** (all columns plus three example students) and a **column guide** (type, allowed values and meaning of each column, taken from the training data). Both are in the *CSV template & rules* panel under every upload box and on the Documentation page.
+
+Uploads are checked before they replace the current data:
+
+- **Blocking errors:** not a CSV, unreadable, no rows, missing required columns, text in a number column, or empty cells.
+- **Warnings** (the file is still used): no `Target` column, unknown `Target` values, codes the models have never seen, values outside the training range, or extra columns.
 
 ### Deploying on Streamlit Community Cloud
 
