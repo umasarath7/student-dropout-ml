@@ -6,12 +6,13 @@ it predicts whether a student drops out, stays enrolled or graduates.
 """
 from pathlib import Path
 
+import altair as alt
 import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, recall_score
 
 from model import decision_tree, knn, logistic_regression, naive_bayes, svm
 from model.features import CLASS_ORDER, TARGET, load_csv
@@ -35,10 +36,6 @@ def read_upload(file):
     return load_csv(file)
 
 
-def expected_columns(model):
-    return list(model.feature_names_in_)
-
-
 def plot_confusion(y_true, y_pred, title):
     cm = confusion_matrix(y_true, y_pred, labels=CLASS_ORDER)
     fig, ax = plt.subplots(figsize=(4.6, 3.8))
@@ -51,24 +48,22 @@ def plot_confusion(y_true, y_pred, title):
     return fig
 
 
+def ranked_bar_chart(series, metric):
+    """Horizontal bars, best at the top, with the exact value printed on each bar."""
+    df = series.rename(metric).rename_axis("Model").reset_index()
+    order = df.sort_values(metric, ascending=False)["Model"].tolist()
+    base = alt.Chart(df).encode(
+        y=alt.Y("Model:N", sort=order, title=None, axis=alt.Axis(labelLimit=0)),
+        x=alt.X(f"{metric}:Q", title=metric, scale=alt.Scale(domain=[0, 1])),
+    )
+    bars = base.mark_bar(color="#4c78a8")
+    labels = base.mark_text(align="left", dx=4).encode(
+        text=alt.Text(f"{metric}:Q", format=".4f")
+    )
+    return (bars + labels).properties(height=230)
+
+
 models = load_models()
-
-# ---------------- Sidebar ----------------
-with st.sidebar:
-    st.header("1. Test data")
-    uploaded = st.file_uploader("Upload a CSV file", type=["csv"],
-                                help="Use the same columns as test_data.csv. "
-                                     "Keep the 'Target' column to see scores.")
-    st.download_button("Download sample test_data.csv", SAMPLE_CSV.read_bytes(),
-                       file_name="test_data.csv", mime="text/csv")
-    use_sample = st.checkbox("Or use the bundled test set", value=uploaded is None)
-
-    st.header("2. Model")
-    model_name = st.selectbox("Choose a classifier", list(models.keys()),
-                              index=len(models) - 1)
-
-    st.caption("All models were trained on 80% of the data. The bundled "
-               "test set is the other 20% that the models never saw.")
 
 # ---------------- Header ----------------
 st.title("🎓 Student Outcome Predictor")
@@ -78,17 +73,33 @@ st.write(
     "(background, finances and first-year grades) and shows how accurate each one is."
 )
 
+# ---------------- Controls (on the main page so they are always visible) ----------------
+with st.container(border=True):
+    c_upload, c_model = st.columns([3, 2])
+    with c_upload:
+        st.markdown("**Step 1. Upload test data (CSV)**")
+        uploaded = st.file_uploader(
+            "Upload CSV", type=["csv"], label_visibility="collapsed",
+            help="Use the same columns as test_data.csv. Keep the 'Target' column to see scores.",
+        )
+        st.download_button("Download sample test_data.csv", SAMPLE_CSV.read_bytes(),
+                           file_name="test_data.csv", mime="text/csv")
+    with c_model:
+        st.markdown("**Step 2. Choose a classifier**")
+        model_name = st.selectbox("Choose a classifier", list(models.keys()),
+                                  index=len(models) - 1, label_visibility="collapsed")
+        st.caption("All models were trained on 80% of the data. The bundled test set "
+                   "is the other 20%, which the models never saw.")
+
 if uploaded is not None:
     data = read_upload(uploaded)
-    source = uploaded.name
-elif use_sample:
-    data = load_csv(SAMPLE_CSV)
-    source = "bundled test_data.csv"
+    from_upload = True
 else:
-    st.info("Upload a CSV in the sidebar, or tick **use the bundled test set**.")
-    st.stop()
+    data = load_csv(SAMPLE_CSV)
+    from_upload = False
 
-needed = expected_columns(models[model_name])
+model = models[model_name]
+needed = list(model.feature_names_in_)
 missing = [c for c in needed if c not in data.columns]
 if missing:
     st.error(f"The file is missing {len(missing)} required column(s): "
@@ -97,10 +108,15 @@ if missing:
 
 has_labels = TARGET in data.columns
 if has_labels:
-    data = data[data[TARGET].isin(CLASS_ORDER)]
+    data = data[data[TARGET].isin(CLASS_ORDER)].reset_index(drop=True)
 X = data[needed]
 
-st.caption(f"Data source: **{source}** · {len(X)} students · {len(needed)} input columns")
+if from_upload:
+    st.success(f"Using your file **{uploaded.name}**: {len(X)} students.")
+else:
+    st.info(f"No file uploaded yet, so the bundled **test_data.csv** is being used "
+            f"({len(X)} students). Upload your own CSV above to replace it.")
+
 with st.expander("Peek at the data"):
     st.dataframe(data.head(20), width="stretch")
 
@@ -108,7 +124,6 @@ tab_one, tab_all, tab_pred = st.tabs(
     ["📊 Selected model", "🏁 Compare all models", "🔮 Predictions"]
 )
 
-model = models[model_name]
 y_pred = model.predict(X)
 y_proba = model.predict_proba(X)
 
@@ -123,7 +138,7 @@ with tab_one:
         st.subheader(f"{model_name}: evaluation metrics")
         cols = st.columns(6)
         for col, (k, v) in zip(cols, scores.items()):
-            col.metric(k, f"{v:.3f}")
+            col.metric(k, f"{v:.4f}")
         st.caption("Precision, Recall and F1 are macro averages, so the small "
                    "'Enrolled' group counts as much as the others. AUC is one-vs-rest.")
 
@@ -131,11 +146,15 @@ with tab_one:
         with left:
             st.markdown("**Confusion matrix**")
             st.pyplot(plot_confusion(y_true, y_pred, model_name))
+            st.caption("How to read it: each **row** is the students' actual outcome and "
+                       "each **column** is what the model predicted. The **diagonal** "
+                       "(top-left to bottom-right) counts correct predictions; every other "
+                       "cell is a mistake.")
         with right:
             st.markdown("**Classification report**")
             report = classification_report(y_true, y_pred, labels=CLASS_ORDER,
                                            output_dict=True, zero_division=0)
-            st.dataframe(pd.DataFrame(report).T.round(3), width="stretch")
+            st.dataframe(pd.DataFrame(report).T.round(4), width="stretch")
             weakest = min(CLASS_ORDER, key=lambda c: report[c]["recall"])
             st.info(f"This model finds it hardest to recognise **{weakest}** students "
                     f"(recall {report[weakest]['recall']:.2f}).")
@@ -146,29 +165,46 @@ with tab_all:
         st.warning("Add a 'Target' column to compare models.")
     else:
         y_true = data[TARGET]
-        rows = []
+        rows, class_recall = [], {}
         for name, mdl in models.items():
             p = mdl.predict(X)
             rows.append({"Model": name,
                          **score_all(y_true, p, mdl.predict_proba(X), list(mdl.classes_))})
+            class_recall[name] = recall_score(y_true, p, labels=CLASS_ORDER, average=None)
         table = pd.DataFrame(rows).set_index("Model")
+
         st.subheader("All five models on this data")
-        st.dataframe(table.style.format("{:.4f}").highlight_max(axis=0, color="#c7e9c0"),
-                     width="stretch")
+        st.dataframe(
+            table.style.format("{:.4f}").highlight_max(
+                axis=0, props="font-weight: bold; background-color: #c7e9c0; color: #111111;"
+            ),
+            width="stretch",
+        )
+        st.caption("The best score in each column is shown in **bold** on a green background.")
         best = table["F1"].idxmax()
         st.success(f"Best macro F1 on this data: **{best}** ({table.loc[best, 'F1']:.4f})")
 
         metric = st.radio("Metric to chart", list(table.columns), horizontal=True, index=4)
-        st.bar_chart(table[metric].sort_values(), horizontal=True)
+        st.altair_chart(ranked_bar_chart(table[metric], metric), width="stretch")
+
+        recall_df = pd.DataFrame(class_recall, index=CLASS_ORDER).T
+        hardest = recall_df.mean().idxmin()
+        st.markdown("**Recall for each class** (share of each group the model finds)")
+        st.dataframe(recall_df.style.format("{:.3f}"), width="stretch")
+        st.info(f"Across all five models, **{hardest}** students are the hardest to recognise "
+                f"(average recall {recall_df[hardest].mean():.2f}). They are partly passing and "
+                f"partly failing, so they look like a mix of the other two groups.")
 
 # ---------------- Tab 3: predictions ----------------
 with tab_pred:
-    out = data.copy()
+    out = data.drop(columns=[TARGET], errors="ignore").copy()
+    prob_cols = {f"P({cls})": y_proba[:, i].round(3) for i, cls in enumerate(model.classes_)}
+    for i, (col, vals) in enumerate(prob_cols.items()):
+        out.insert(i, col, vals)
     out.insert(0, "Predicted", y_pred)
-    for i, cls in enumerate(model.classes_):
-        out.insert(1 + i, f"P({cls})", y_proba[:, i].round(3))
     if has_labels:
-        out.insert(0, "Correct?", out["Predicted"] == out[TARGET])
+        out.insert(0, "Actual", data[TARGET].values)
+        out.insert(2, "Correct?", out["Actual"] == out["Predicted"])
 
     st.subheader(f"What {model_name} predicts")
     counts = pd.Series(y_pred).value_counts().reindex(CLASS_ORDER, fill_value=0)
@@ -176,9 +212,18 @@ with tab_pred:
     for col, cls in zip((c1, c2, c3), CLASS_ORDER):
         col.metric(f"Predicted {cls}", int(counts[cls]))
 
-    show_risk = st.checkbox("Show only students predicted to drop out")
-    view = out[out["Predicted"] == "Dropout"] if show_risk else out
+    filters = ["All students", "Only students predicted to drop out"]
+    if has_labels:
+        filters.append("Only wrong predictions")
+    choice = st.radio("Show", filters, horizontal=True)
+    if choice == filters[1]:
+        view = out[out["Predicted"] == "Dropout"]
+    elif has_labels and choice == filters[2]:
+        view = out[~out["Correct?"]]
+    else:
+        view = out
+    st.caption(f"Showing {len(view)} of {len(out)} students.")
     st.dataframe(view, width="stretch", height=380)
-    st.download_button("Download predictions as CSV", view.to_csv(index=False).encode(),
+    st.download_button("Download these predictions as CSV", view.to_csv(index=False).encode(),
                        file_name=f"predictions_{model_name.replace(' ', '_').lower()}.csv",
                        mime="text/csv")
