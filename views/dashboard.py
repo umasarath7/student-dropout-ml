@@ -37,7 +37,7 @@ def render():
     ui.section("Dataset", "What the models are being evaluated on", "database")
     ui.dataset_summary_card()
 
-    ui.section("Machine learning models", "Pick a model; every panel below updates to match", "activity")
+    ui.section("Machine learning models", "Ranked best to worst by macro F1. Pick one and every panel below updates to match.", "activity")
     ui.model_cards(ev, "dash_card")
     c1, _ = st.columns([1, 2])
     with c1:

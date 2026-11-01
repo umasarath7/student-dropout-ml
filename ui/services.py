@@ -213,6 +213,18 @@ def comparison_table(ev):
     return pd.DataFrame(rows).T[METRICS] if rows else pd.DataFrame(columns=METRICS)
 
 
+def ranked_model_names(ev=None):
+    """Models in order of preference: best macro F1 first (ties broken by MCC).
+
+    Falls back to the training order when the data has no labels to rank on.
+    """
+    ev = ev or current_evaluation()
+    table = comparison_table(ev)
+    if table.empty:
+        return model_names()
+    return table.sort_values(["F1", "MCC"], ascending=False).index.tolist()
+
+
 def report_table(report):
     rows = []
     for key, label in [*[(c, c) for c in CLASS_ORDER],

@@ -122,20 +122,21 @@ def _sync_from_widget(key):
 def model_picker(key, label="Choose a classifier"):
     """Dropdown bound to the app-wide selected model."""
     st.session_state[key] = st.session_state.selected_model
-    st.selectbox(label, svc.model_names(), key=key, on_change=_sync_from_widget, args=(key,))
+    st.selectbox(label, svc.ranked_model_names(), key=key, on_change=_sync_from_widget, args=(key,),
+                 help="Listed from best to worst macro F1 on the current dataset.")
 
 
 def model_cards(ev, key):
     table = svc.comparison_table(ev)
     selected = st.session_state.selected_model
-    best = table["F1"].idxmax() if len(table) else None
-    cols = st.columns(len(svc.model_names()))
-    for col, name in zip(cols, svc.model_names()):
+    order = svc.ranked_model_names(ev)
+    cols = st.columns(len(order))
+    for rank, (col, name) in enumerate(zip(cols, order), start=1):
         is_sel = name == selected
         if name in table.index:
             acc = table.loc[name, "Accuracy"]
             acc_html = f'<div class="ep-model-acc">{acc:.4f}<span>accuracy</span></div>'
-            status = badge("Best F1", "success") if name == best else badge("Evaluated", "info")
+            status = badge("#1 · Best F1", "success") if rank == 1 else badge(f"#{rank} by F1", "info")
         else:
             acc_html = '<div class="ep-model-acc" style="color:var(--ep-muted)">—<span>no labels</span></div>'
             status = badge("Predictions only", "neutral")

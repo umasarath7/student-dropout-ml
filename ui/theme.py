@@ -106,12 +106,13 @@ _CSS = f"""
 
 /* Model cards */
 .ep-model {{ background:var(--ep-card); border:1px solid var(--ep-border); border-radius:12px; padding:14px 15px;
-  min-height: 150px; margin-bottom: 4px; transition: border-color .15s ease, background .15s ease; }}
+  margin-bottom: 4px; box-sizing: border-box; transition: border-color .15s ease, background .15s ease; }}
 .ep-model:hover {{ border-color:#4a5275; }}
 .ep-model.selected {{ border-color: var(--ep-primary); box-shadow: inset 0 0 0 1px var(--ep-primary);
   background: linear-gradient(180deg, rgba(118,80,232,.18), rgba(118,80,232,.04)), var(--ep-card); }}
 .ep-model-top {{ display:flex; justify-content:space-between; align-items:flex-start; gap:6px; }}
-.ep-model-name {{ font-weight:600; margin-top:10px; color:var(--ep-text); line-height:1.25; }}
+.ep-model-name {{ font-weight:600; margin-top:10px; color:var(--ep-text); line-height:1.25;
+  min-height: 2.5em; display:flex; align-items:flex-start; }}
 .ep-model-acc {{ font-size:1.25rem; font-weight:700; margin-top:4px; font-variant-numeric: tabular-nums; }}
 .ep-model-acc span {{ font-size:.74rem; color:var(--ep-muted); font-weight:500; margin-left:4px; }}
 
@@ -140,6 +141,9 @@ button[kind="primary"] {{ background: linear-gradient(135deg, var(--ep-primary),
 @media (max-width: 900px) {{
   .ep-hero h1 {{ font-size: 1.7rem; }}
 }}
+@media (min-width: 641px) and (max-width: 1180px) {{
+  .ep-model-name {{ min-height: 3.75em; }}
+}}
 @media (max-width: 640px) {{
   .block-container {{ padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; }}
   .ep-hero {{ padding: 18px; }}
@@ -148,7 +152,7 @@ button[kind="primary"] {{ background: linear-gradient(135deg, var(--ep-primary),
   .ep-kpi {{ padding: 12px; }}
   .ep-kpi-value {{ font-size: 1.3rem; margin-top: 7px; }}
   .ep-tip:hover::after, .ep-tip:focus-visible::after {{ width: 180px; }}
-  .ep-model {{ min-height: 0; }}
+  .ep-model-name {{ min-height: 0; }}
   .ep-page h1 {{ font-size: 1.35rem; }}
 }}
 </style>
