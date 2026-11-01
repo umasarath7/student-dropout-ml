@@ -1,0 +1,21 @@
+{
+  "Logistic Regression": {
+    "C": 5.0
+  },
+  "Decision Tree": {
+    "criterion": "entropy",
+    "max_depth": 6,
+    "min_samples_leaf": 5
+  },
+  "kNN": {
+    "n_neighbors": 5,
+    "weights": "distance"
+  },
+  "Naive Bayes": {
+    "var_smoothing": 0.1
+  },
+  "Support Vector Machine": {
+    "C": 3.0,
+    "gamma": "scale"
+  }
+}
