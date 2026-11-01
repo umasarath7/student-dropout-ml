@@ -41,7 +41,7 @@ _CSS = f"""
 .ep-hero {{ display:flex; flex-wrap:wrap; gap:18px; justify-content:space-between; align-items:flex-end;
   padding: 24px 26px; border:1px solid var(--ep-border); border-radius:14px;
   background: radial-gradient(1200px 300px at 0% 0%, rgba(118,80,232,.22), transparent 60%), var(--ep-card); }}
-.ep-hero h1 {{ font-size:2.05rem; font-weight:700; margin:0; padding:0; color:var(--ep-text); letter-spacing:-.02em; }}
+.ep-hero h1, .ep-hero-body h1 {{ font-size:2.05rem; font-weight:700; margin:0; padding:0; color:var(--ep-text); letter-spacing:-.02em; }}
 .ep-tagline {{ color:var(--ep-violet); font-weight:600; margin: 4px 0 8px; font-size:1rem; }}
 .ep-desc {{ color:var(--ep-muted); max-width: 680px; margin:0; line-height:1.5; }}
 .ep-chips {{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 14px; }}
@@ -49,6 +49,43 @@ _CSS = f"""
   border:1px solid var(--ep-border); background: var(--ep-elev); color:var(--ep-text); font-size:.8rem; }}
 .ep-chip svg {{ color: var(--ep-muted); }}
 .ep-dot {{ width:8px; height:8px; border-radius:50%; display:inline-block; }}
+
+/* Hero box with the upload call-to-action inside it */
+.st-key-ep_hero {{ padding: 24px 26px 20px; border:1px solid var(--ep-border); border-radius:14px; gap: 18px;
+  background: radial-gradient(1200px 300px at 0% 0%, rgba(118,80,232,.22), transparent 60%), var(--ep-card); }}
+.st-key-ep_cta {{ position: relative; overflow: hidden; padding: 16px 18px; border-radius: 12px;
+  border: 1px solid rgba(167,139,250,.55);
+  background: linear-gradient(110deg, rgba(118,80,232,.55) 0%, rgba(99,66,214,.35) 45%, rgba(56,189,248,.28) 100%);
+  box-shadow: 0 8px 28px rgba(118,80,232,.22); }}
+.st-key-ep_cta::before {{ content:""; position:absolute; inset:0; pointer-events:none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.10) 50%, transparent 70%);
+  transform: translateX(-100%); animation: ep-sheen 6s ease-in-out infinite; }}
+@keyframes ep-sheen {{ 0%, 60% {{ transform: translateX(-100%); }} 100% {{ transform: translateX(100%); }} }}
+@media (prefers-reduced-motion: reduce) {{ .st-key-ep_cta::before {{ animation: none; }} }}
+.ep-hero-body {{ margin-bottom: 6px; }}
+/* Streamlit gives text blocks a -16px bottom margin; cancel it inside the hero so padding is honoured */
+.st-key-ep_hero [data-testid="stMarkdownContainer"] {{ margin-bottom: 0 !important; }}
+.st-key-ep_cta {{ padding: 18px 20px !important; }}
+.st-key-ep_cta [data-testid="stHorizontalBlock"] {{ align-items: center; }}
+.ep-cta-text {{ display:flex; gap:14px; align-items:center; }}
+.ep-cta-icon {{ width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; color:#fff; background: rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25); }}
+.ep-cta-title {{ font-weight:700; font-size:1.08rem; color:#fff; }}
+.ep-cta-sub {{ color: rgba(248,250,252,.85); font-size:.88rem; line-height:1.45; margin-top:2px; }}
+.st-key-ep_cta button[kind="primary"], .st-key-ep_cta [data-testid="stPopoverButton"] {{
+  background: #fff !important; color: #3b21a8 !important; border: none !important; font-weight: 700;
+  min-height: 46px; box-shadow: 0 6px 18px rgba(11,13,24,.35); transition: transform .15s ease, box-shadow .15s ease; }}
+.st-key-ep_cta [data-testid="stPopoverButton"]:hover {{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(11,13,24,.45); }}
+.st-key-ep_cta [data-testid="stPopoverButton"] * {{ color: #3b21a8 !important; }}
+
+/* Documentation pipeline steps */
+.ep-steps {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:12px; }}
+.ep-step {{ background:var(--ep-card); border:1px solid var(--ep-border); border-radius:12px; padding:16px; }}
+.ep-step-num {{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px;
+  border-radius:50%; font-weight:700; font-size:.85rem; color:#fff;
+  background: linear-gradient(135deg, var(--ep-primary), var(--ep-cyan)); }}
+.ep-step-title {{ font-weight:600; margin-top:10px; color:var(--ep-text); }}
+.ep-step-body {{ color:var(--ep-muted); font-size:.85rem; line-height:1.5; margin-top:4px; }}
 
 /* Page header (non-dashboard pages) */
 .ep-page {{ display:flex; gap:14px; align-items:center; margin-bottom: 6px; }}
@@ -147,7 +184,9 @@ button[kind="primary"] {{ background: linear-gradient(135deg, var(--ep-primary),
 @media (max-width: 640px) {{
   .block-container {{ padding-left: 1rem; padding-right: 1rem; padding-top: 1rem; }}
   .ep-hero {{ padding: 18px; }}
-  .ep-hero h1 {{ font-size: 1.5rem; }}
+  .ep-hero h1, .ep-hero-body h1 {{ font-size: 1.5rem; }}
+  .st-key-ep_hero {{ padding: 18px; }}
+  .ep-cta-text {{ align-items:flex-start; }}
   .ep-kpi-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }}
   .ep-kpi {{ padding: 12px; }}
   .ep-kpi-value {{ font-size: 1.3rem; margin-top: 7px; }}

@@ -15,9 +15,8 @@ def render():
     errors, _ = svc.validate_dataset(ss.dataset)
     status = ("Dataset ready", "var(--ep-success)") if not errors else ("Needs attention", "var(--ep-danger)")
 
-    top, action = st.columns([4, 1.45], vertical_alignment="bottom")
-    with top:
-        ui.html(f"""<div class="ep-hero"><div>
+    with st.container(key="ep_hero"):
+        ui.html(f"""<div class="ep-hero-body">
         <h1>EduPulse</h1><div class="ep-tagline">Predict. Understand. Empower.</div>
         <p class="ep-desc">AI-powered insights that help identify at-risk students, predict academic
         outcomes, and enable better student success.</p>
@@ -26,12 +25,20 @@ def render():
           <span class="ep-chip">{icon('users', 14)} {len(ss.dataset):,} students</span>
           <span class="ep-chip">{icon('file', 14)} {escape(ss.dataset_name)}</span>
           <span class="ep-chip">{icon('clock', 14)} Evaluated {ss.dataset_loaded_at.strftime('%d %b, %H:%M')}</span>
-        </div></div></div>""")
-    with action:
-        with st.popover("Upload New Dataset", icon=":material/upload_file:", type="primary", width="stretch", wrap=True):
-            st.markdown("**Upload test data (CSV)**")
-            ui.upload_panel("upload_dashboard")
-            ui.sample_download("sample_dashboard")
+        </div></div>""")
+        with st.container(key="ep_cta"):
+            text, button = st.columns([3, 1.15], vertical_alignment="center", gap="medium")
+            with text:
+                ui.html(f"""<div class="ep-cta-text"><span class="ep-cta-icon">{icon('upload', 22)}</span>
+                <div><div class="ep-cta-title">Want to know how your students will do?</div>
+                <div class="ep-cta-sub">Upload your own student data (CSV) and EduPulse will predict who is
+                likely to drop out, stay enrolled or graduate, in seconds, with all five models.</div></div></div>""")
+            with button:
+                with st.popover("Upload New Dataset", icon=":material/upload_file:", type="primary",
+                                width="stretch"):
+                    st.markdown("**Upload test data (CSV)**")
+                    ui.upload_panel("upload_dashboard")
+                    ui.sample_download("sample_dashboard")
     ui.show_flash()
 
     ui.section("Dataset", "What the models are being evaluated on", "database")
