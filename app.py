@@ -9,7 +9,7 @@ import streamlit as st
 from ui import components as ui
 from ui import services as svc
 from ui.theme import inject_css, mark_active_nav
-from views import dashboard, dataset, evaluation, insights, predictions, settings
+from views import dashboard, dataset, docs, evaluation, insights, predictions, settings
 
 st.set_page_config(page_title="EduPulse · Student Outcome Intelligence", page_icon="🎓",
                    layout="wide", initial_sidebar_state="auto")
@@ -23,6 +23,7 @@ pages = [
     st.Page(dataset.render, title="Dataset", icon=":material/database:", url_path="dataset"),
     st.Page(insights.render, title="Insights", icon=":material/lightbulb:", url_path="insights"),
     st.Page(settings.render, title="Settings", icon=":material/settings:", url_path="settings"),
+    st.Page(docs.render, title="Documentation", icon=":material/menu_book:", url_path="docs"),
 ]
 current = st.navigation(pages, position="hidden")
 mark_active_nav("" if current.url_path in ("", "dashboard") else current.url_path)
