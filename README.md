@@ -74,12 +74,21 @@ All of this lives inside one scikit-learn `Pipeline` per model. The saved model 
 
 ```
 project-folder/
-├── app.py                     Streamlit web app
+├── app.py                     Streamlit entry point (EduPulse): theme, sidebar, navigation
 ├── requirements.txt           Python packages (pinned versions)
+├── .streamlit/config.toml     Dark theme colours and font
 ├── README.md                  This file
 ├── test_data.csv              The 20% hold-out test set (885 rows, with Target)
 ├── data/
 │   └── students.csv           Full original dataset (4,424 rows)
+├── ui/
+│   ├── services.py            Loads models, validates data, computes every metric live
+│   ├── components.py          Reusable cards, KPI grid, model picker, upload panel
+│   ├── charts.py              Altair charts (comparison, confusion matrix, ROC, donut)
+│   ├── theme.py               Colours and styles
+│   └── icons.py               Lucide icons
+├── views/                     One file per page: dashboard, evaluation, predictions,
+│                              dataset, insights, settings
 └── model/
     ├── features.py            Loading, feature engineering, encoding and scaling
     ├── metrics.py             The six evaluation metrics
@@ -162,20 +171,29 @@ Because there are three classes and they are not balanced:
 
 ---
 
-## Streamlit app
+## Streamlit app: EduPulse
 
 **Live link:** `<paste your Streamlit app link here>`
 
-What the app offers:
+The app is branded **EduPulse: Predict. Understand. Empower.** It has a dark dashboard layout with a sidebar for moving between six pages. On phones the sidebar folds into the `>>` button at the top left, and the upload button and model choice stay on the main page.
 
-1. **CSV upload** (Step 1, at the top of the page). Upload `test_data.csv` or any CSV with the same columns. A green message confirms your file and its row count. Until you upload, the app uses the bundled test set so there is always something to see, and a *Download sample* button gives you the right file.
-2. **Model selection dropdown** (Step 2, next to the upload box) to switch between the five models.
-3. **Evaluation metrics:** Accuracy, AUC, Precision, Recall, F1 and MCC for the chosen model, to four decimals, matching the table above.
-4. **Confusion matrix** (heatmap, with a short note on how to read it) **and classification report** (precision, recall and F1 for each class), plus a note on which class the model finds hardest.
-5. **Compare all models** tab: all five models scored side by side, with the best value in each column in bold. A ranked bar chart with the exact value on each bar lets you switch between metrics, and a per-class recall table shows which group every model struggles with.
-6. **Predictions** tab: the actual outcome, the predicted outcome, whether it was correct, and the probability of each class for every student. Filters show only students predicted to drop out, or only wrong predictions, and the view can be downloaded as CSV.
+| Page | What it shows |
+|---|---|
+| **Dashboard** | Dataset summary, **Upload New Dataset** button, five clickable model cards plus a **model dropdown**, the six **evaluation metrics**, a ranked model-comparison chart, the **confusion matrix** and the **classification report** |
+| **Model Evaluation** | Settings chosen by tuning, train/test split, metrics, confusion matrix, classification report, ROC curves per outcome, comparison and model-specific diagnostics (tree importances, regression coefficients, support vectors, ...) |
+| **Predictions** | Outcome counts and donut chart, a searchable and sortable table for every student (predicted vs actual, class probabilities, dropout-risk band), filters, a detail view when you click a student, and CSV export of exactly what is shown |
+| **Dataset** | Drag-and-drop CSV upload with step-by-step checks, sample download, quality summary (missing values, duplicates, required columns), column types and a paged preview |
+| **Insights** | Findings and suggested actions written from the live results: baseline comparison, hardest outcome to detect, most common mistake, how much the models agree with each other, high-risk students |
+| **Settings** | Dropout-risk band thresholds, reset to the bundled data, tuned model settings |
 
-If the uploaded file has no `Target` column, the app still makes predictions and simply skips the scores.
+How it maps to the assignment's required features:
+
+1. **Dataset upload (CSV):** *Upload New Dataset* on the Dashboard, and on the Dataset page. A file only replaces the current data if it passes every check; otherwise a clear error lists what is wrong.
+2. **Model selection dropdown:** "Choose a classifier" on every page, plus the model cards on the Dashboard.
+3. **Evaluation metrics:** Accuracy, AUC, Precision, Recall, F1 and MCC, to four decimals, matching the table above.
+4. **Confusion matrix and classification report:** on the Dashboard and the Model Evaluation page.
+
+Every number is calculated live from the saved models on whichever dataset is loaded; nothing is hardcoded. If a file has no `Target` column, the app still makes predictions and shows a short note wherever scores would appear.
 
 ### Deploying on Streamlit Community Cloud
 
