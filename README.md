@@ -2,7 +2,7 @@
 
 **ML Assignment 2, M.Tech (DSE), Machine Learning**
 
-- **Live app:** `<paste your Streamlit app link here>`
+- **Live app:** https://student-dropout-mlgit-2025ns04007.streamlit.app/
 - **GitHub repo:** https://github.com/umasarath7/student-dropout-ml
 
 ---
@@ -174,7 +174,7 @@ Because there are three classes and they are not balanced:
 
 ## Streamlit app: EduPulse
 
-**Live link:** `<paste your Streamlit app link here>`
+**Live link:** https://student-dropout-mlgit-2025ns04007.streamlit.app/
 
 The app is branded **EduPulse: Predict. Understand. Empower.** It has a dark dashboard layout with a sidebar for moving between six pages. On phones the sidebar folds into the `>>` button at the top left, and the upload button and model choice stay on the main page.
 
