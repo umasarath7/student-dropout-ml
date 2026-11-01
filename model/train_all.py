@@ -65,7 +65,7 @@ def main():
     results = pd.DataFrame(rows)
     results.to_csv(SAVE_DIR / "results.csv", index=False)
     (SAVE_DIR / "best_params.json").write_text(json.dumps(best_params, indent=2, default=str))
-    print("\n" + results.round(4).to_markdown(index=False))
+    print("\n" + results.round(4).to_string(index=False))
     print(json.dumps(best_params, indent=2, default=str))
 
 
